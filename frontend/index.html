@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивная карта лесных дорог</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- ШАПКА САЙТА -->
+    <header id="header">
+        <div class="header-container">
+            <div class="logo">
+                <span>🌲 Лесные дороги</span>
+            </div>
+
+            <nav class="main-nav">
+                <a href="/" class="active">Главная</a>
+                <a href="/roads-info.html">Информация по дорогам</a>
+                <a href="#" id="auth-link" class="auth-link">Войти</a>
+            </nav>
+
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Поиск дороги...">
+                <button id="search-btn">🔍</button>
+            </div>
+
+            <button class="mobile-menu-toggle" aria-label="Меню">☰</button>
+        </div>
+    </header>
+
+    <!-- ОСНОВНАЯ РАБОЧАЯ ОБЛАСТЬ (КАРТА) -->
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- ПОПАП ДЛЯ ИНФОРМАЦИИ ОБ ОБЪЕКТЕ -->
+    <div id="info-popup" class="popup hidden">
+        <div class="popup-header">
+            <h3 id="popup-title">Информация</h3>
+            <button class="popup-close" id="popup-close">&times;</button>
+        </div>
+        <div class="popup-body" id="popup-body">
+            <p>Кликните на объект для получения информации</p>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ВХОДА -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>🔐 Вход в систему</h2>
+                <button class="modal-close" id="login-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">Имя пользователя</label>
+                        <input type="text" id="login-username" placeholder="Введите имя пользователя" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Пароль</label>
+                        <input type="password" id="login-password" placeholder="Введите пароль" required>
+                    </div>
+                    <div id="login-error" class="auth-message" style="color: red; display: none;"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Войти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО ПРОФИЛЯ ===== -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>👤 Профиль пользователя</h2>
+                <button class="modal-close" id="profile-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="profile-info">
+                    <p><strong>Имя пользователя:</strong> <span id="profile-username">—</span></p>
+                    <p><strong>Email:</strong> <span id="profile-email">—</span></p>
+                    <p><strong>Последний вход:</strong> <span id="profile-last-login">—</span></p>
+                </div>
+                <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    <button id="profile-change-password" class="btn-secondary">🔑 Сменить пароль</button>
+                    <button id="profile-logout" class="btn-danger">🚪 Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО СМЕНЫ ПАРОЛЯ ===== -->
+    <div id="change-password-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>🔑 Смена пароля</h2>
+                <button class="modal-close" id="change-password-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form">
+                    <div class="form-group">
+                        <label for="old-password">Текущий пароль</label>
+                        <input type="password" id="old-password" placeholder="Введите текущий пароль" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Новый пароль</label>
+                        <input type="password" id="new-password" placeholder="Введите новый пароль" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Подтверждение нового пароля</label>
+                        <input type="password" id="confirm-password" placeholder="Подтвердите новый пароль" required>
+                    </div>
+                    <div class="password-requirements" style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                        <p>📋 Требования к паролю:</p>
+                        <ul style="padding-left: 20px; margin: 5px 0;">
+                            <li>Минимум 8 символов</li>
+                            <li>Не должен быть слишком простым</li>
+                            <li>Не должен совпадать с именем пользователя</li>
+                        </ul>
+                    </div>
+                    <div id="password-change-error" class="auth-message" style="color: red; display: none;"></div>
+                    <div id="password-change-success" class="auth-message" style="color: green; display: none;"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Сменить пароль</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Основные скрипты -->
+    <script src="js/auth.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+{
+    "build": {
+        "builder": "NIXPACKS",
+        "buildCommand": "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    },
+    "deploy": {
+        "startCommand": "cd backend && python manage.py migrate && gunicorn forest_roads.wsgi:application --bind 0.0.0.0:$PORT",
+        "healthcheckPath": "/admin",
+        "healthcheckTimeout": 100,
+        "restartPolicyType": "ON_FAILURE"
+    }
+}
