@@ -5,7 +5,6 @@ __pycache__/
 
 # Статические файлы (собранные)
 staticfiles/
-static/
 
 # База данных
 *.sqlite3
