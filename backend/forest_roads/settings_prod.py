@@ -72,16 +72,15 @@ if DATABASE_URL:
         'default': dj_database_url.config(default=DATABASE_URL)
     }
 else:
-    # Это запасной вариант для этапа сборки, чтобы код мог загрузиться.
-    # Важно: эта БД НЕ БУДЕТ РАБОТАТЬ, она нужна только для загрузки настроек.
+    # Фallback на случай, если переменная не задана (не должно происходить в продакшене)
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': 'dummy_db',
-            'USER': 'dummy_user',
-            'PASSWORD': 'dummy_pass',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'NAME': os.environ.get('DB_NAME', 'forest_roads'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
 # ===== КОНЕЦ ИСПРАВЛЕННОГО БЛОКА =====
