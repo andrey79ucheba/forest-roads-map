@@ -65,14 +65,15 @@ WSGI_APPLICATION = 'forest_roads.wsgi.application'
 # ===== ИСПРАВЛЕННЫЙ БЛОК БАЗЫ ДАННЫХ =====
 # Если переменная DATABASE_URL задана — используем её
 # Если нет — используем настройки по умолчанию (для локальной разработки)
-DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
+# Настройка базы данных
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL)
+        'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
-    # Фallback на случай, если переменная не задана (не должно происходить в продакшене)
+    # Запасной вариант для локальной разработки
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
