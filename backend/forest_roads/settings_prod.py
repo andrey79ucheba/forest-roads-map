@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -8,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Безопасность
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-for-build')
-#DEBUG = os.getenv('DEBUG', 'False') == 'True'
-DEBUG = True # ← ВРЕМЕННО ВКЛЮЧАЕМ
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 # Разрешённые хосты
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
@@ -61,21 +62,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
-# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (ПРЯМАЯ) =====
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME', 'forest_roads'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'require',  
-            'sslrootcert': None,
-        },
+# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (С SSL) =====
+# Сначала пробуем использовать DATABASE_URL (если задана)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Если есть DATABASE_URL — используем её с SSL
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, ssl_require=True)
     }
-}
+else:
+    # Иначе используем отдельные переменные с SSL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.environ.get('DB_NAME', 'forest_roads'),
+            'USER': os.environ.get('DB_USER', 'forest_roads_user'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
 # ===== КОНЕЦ НАСТРОЙКИ БАЗЫ ДАННЫХ =====
 
 # Password validation
