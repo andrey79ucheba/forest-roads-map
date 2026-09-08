@@ -9,9 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Безопасность
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'  # Исправлено
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Разрешённые хосты для Railway
+# Разрешённые хосты
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # Application definition
@@ -62,10 +62,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
-# База данных — через DATABASE_URL (Railway)
-DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost:5432/forest_roads')
-}
+# ===== ИСПРАВЛЕННЫЙ БЛОК БАЗЫ ДАННЫХ =====
+# Если переменная DATABASE_URL задана — используем её
+# Если нет — используем настройки по умолчанию (для локальной разработки)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.environ.get('DB_NAME', 'forest_roads'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+# ===== КОНЕЦ ИСПРАВЛЕННОГО БЛОКА =====
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -81,7 +98,7 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# Статические файлы (только один блок!)
+# Статические файлы
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
