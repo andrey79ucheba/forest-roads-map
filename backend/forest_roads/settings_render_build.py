@@ -26,6 +26,8 @@ DATABASES = {
 
 # Приложения (минимальный набор для collectstatic)
 INSTALLED_APPS = [
+    'django.contrib.contenttypes',  # <-- ОБЯЗАТЕЛЬНО ДОБАВИТЬ
+    'django.contrib.auth',          # <-- ОБЯЗАТЕЛЬНО ДОБАВИТЬ
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'roads',
