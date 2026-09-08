@@ -24,31 +24,22 @@ DATABASES = {
     }
 }
 
-# Приложения (минимальный набор для collectstatic)
+# Минимальный набор приложений — только то, что нужно для collectstatic
 INSTALLED_APPS = [
-    'django.contrib.contenttypes',  # <-- ОБЯЗАТЕЛЬНО ДОБАВИТЬ
-    'django.contrib.auth',          # <-- ОБЯЗАТЕЛЬНО ДОБАВИТЬ
     'django.contrib.staticfiles',
-    'django.contrib.gis',
-    'roads',
-    'users',
 ]
 
-# Настройки статических файлов (такие же, как в основном проекте)
+# Настройки статических файлов
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Отключаем все middleware (они не нужны для сборки)
+# Отключаем всё лишнее
 MIDDLEWARE = []
-
-# Минимальные настройки для работы staticfiles
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-# Остальное — по минимуму
+# Минимальные настройки для загрузки Django
 ROOT_URLCONF = 'forest_roads.urls'
-TEMPLATES = []
-WSGI_APPLICATION = 'forest_roads.wsgi.application'
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
