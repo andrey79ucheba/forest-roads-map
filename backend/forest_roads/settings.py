@@ -113,7 +113,7 @@ LEAFLET_CONFIG = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-GDAL_LIBRARY_PATH = r'C:\Program Files\GDAL\bin\gdal.dll'
+#GDAL_LIBRARY_PATH = r'C:\Program Files\GDAL\bin\gdal.dll'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
