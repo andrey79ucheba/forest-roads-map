@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',
+    'django.contrib.gis',  # ВАЖНО: должен быть первым
     'rest_framework',
     'corsheaders',
     'leaflet',
@@ -62,27 +62,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
-# ===== НАСТРОЙКА БАЗЫ ДАННЫХ =====
+# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (ПРАВИЛЬНАЯ ДЛЯ POSTGIS) =====
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if not DATABASE_URL:
     raise Exception("❌ DATABASE_URL не задан! Проверьте переменные окружения.")
 
-# Используем DATABASE_URL с настройками для Neon
+# Парсим URL вручную для корректной настройки PostGIS
+import re
+# Извлекаем параметры из URL
+db_url_parts = dj_database_url.parse(DATABASE_URL)
+
+# Принудительно устанавливаем движок PostGIS
 DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        ssl_require=True,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': db_url_parts['NAME'],
+        'USER': db_url_parts['USER'],
+        'PASSWORD': db_url_parts['PASSWORD'],
+        'HOST': db_url_parts['HOST'],
+        'PORT': db_url_parts.get('PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'connect_timeout': 10,
+        },
+        'CONN_MAX_AGE': 600,
+        'CONN_HEALTH_CHECKS': True,
+    }
 }
 
-# Добавляем дополнительные опции для Neon
-DATABASES['default']['OPTIONS'] = {
-    'sslmode': 'require',
-    'connect_timeout': 10,
-}
+# Если есть SSL параметры, добавляем их
+if 'sslmode' in db_url_parts.get('OPTIONS', {}):
+    DATABASES['default']['OPTIONS']['sslmode'] = db_url_parts['OPTIONS']['sslmode']
 # ===== КОНЕЦ НАСТРОЙКИ БАЗЫ ДАННЫХ =====
 
 # Password validation
