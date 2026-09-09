@@ -63,7 +63,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
 # ===== НАСТРОЙКА БАЗЫ ДАННЫХ =====
-# Проверяем наличие DATABASE_URL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if not DATABASE_URL:
