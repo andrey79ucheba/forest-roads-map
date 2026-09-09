@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -61,20 +62,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
-# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (ПРЯМАЯ) =====
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME', 'forest_roads'),
-        'USER': os.environ.get('DB_USER', 'forest_roads_user'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'disable',
-        },
+# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (С ПОДДЕРЖКОЙ DATABASE_URL) =====
+# Сначала пробуем использовать DATABASE_URL (передаётся Railway)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Если DATABASE_URL есть — используем её с SSL
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, ssl_require=True)
     }
-}
+else:
+    # Запасной вариант для локальной разработки
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.environ.get('DB_NAME', 'forest_roads'),
+            'USER': os.environ.get('DB_USER', 'forest_roads_user'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'disable',
+            },
+        }
+    }
 # ===== КОНЕЦ НАСТРОЙКИ БАЗЫ ДАННЫХ =====
 
 # Password validation
