@@ -63,36 +63,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
 # ===== НАСТРОЙКА БАЗЫ ДАННЫХ =====
+# Проверяем наличие DATABASE_URL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Для collectstatic и других команд без БД используем заглушку
 if not DATABASE_URL:
-    # Во время сборки (collectstatic) используем временную БД
-    if os.environ.get('BUILDING') or 'collectstatic' in os.environ.get('_', ''):
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': os.path.join(BASE_DIR, 'temp_db.sqlite3'),
-            }
-        }
-        print("⚠️ Используется временная SQLite для сборки статики")
-    else:
-        raise Exception("❌ DATABASE_URL не задан! Проверьте переменные окружения.")
-else:
-    # Используем DATABASE_URL с настройками для Neon
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            ssl_require=True,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-    # Добавляем дополнительные опции для Neon
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require',
-        'connect_timeout': 10,
-    }
+    raise Exception("❌ DATABASE_URL не задан! Проверьте переменные окружения.")
+
+# Используем DATABASE_URL с настройками для Neon
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        ssl_require=True,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# Добавляем дополнительные опции для Neon
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+    'connect_timeout': 10,
+}
 # ===== КОНЕЦ НАСТРОЙКИ БАЗЫ ДАННЫХ =====
 
 # Password validation

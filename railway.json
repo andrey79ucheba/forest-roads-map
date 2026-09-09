@@ -1,7 +1,7 @@
 {
     "build": {
         "builder": "NIXPACKS",
-        "buildCommand": "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput --settings=forest_roads.settings_prod"
+        "buildCommand": "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput --settings=forest_roads.settings_build"
     },
     "deploy": {
         "startCommand": "cd backend && python manage.py migrate --settings=forest_roads.settings_prod && gunicorn forest_roads.wsgi:application --bind 0.0.0.0:$PORT",

@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем весь код из папки backend
 COPY backend/ .
 
-# Сборка статики
-RUN python manage.py collectstatic --noinput --settings=forest_roads.settings_prod
+# Сборка статики - используем специальные настройки для сборки
+RUN python manage.py collectstatic --noinput --settings=forest_roads.settings_build
 
 # Создаем скрипт для запуска с миграциями
 RUN echo '#!/bin/bash\n\
