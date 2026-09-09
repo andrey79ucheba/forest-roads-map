@@ -1,0 +1,23 @@
+app = "forest-roads-map"
+primary_region = "ewr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "forest_roads.settings_prod"
+  DEBUG = "False"
+  ALLOWED_HOSTS = "forest-roads-map.fly.dev"
+  PYTHONUNBUFFERED = "true"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
