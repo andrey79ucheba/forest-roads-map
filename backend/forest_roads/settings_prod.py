@@ -47,7 +47,7 @@ ROOT_URLCONF = 'forest_roads.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # ДОБАВЛЕНО: путь к шаблонам
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,34 +62,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
-# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (С ПОДДЕРЖКОЙ DATABASE_URL) =====
+# ===== НАСТРОЙКА БАЗЫ ДАННЫХ (ТОЛЬКО DATABASE_URL) =====
+# ПРИНУДИТЕЛЬНО используем DATABASE_URL из переменных окружения
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_URL:
-    # Для Neon используем pooled connection с SSL
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            ssl_require=True,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
-    # Запасной вариант для локальной разработки
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': os.environ.get('DB_NAME', 'forest_roads'),
-            'USER': os.environ.get('DB_USER', 'forest_roads_user'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
-            'OPTIONS': {
-                'sslmode': 'disable',
-            },
-        }
-    }
+if not DATABASE_URL:
+    raise Exception("❌ DATABASE_URL не задан! Проверьте переменные окружения.")
+
+# Используем DATABASE_URL с настройками для Neon
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        ssl_require=True,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# Добавляем дополнительные опции для Neon
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+    'connect_timeout': 10,
+}
 # ===== КОНЕЦ НАСТРОЙКИ БАЗЫ ДАННЫХ =====
 
 # Password validation
@@ -120,7 +114,7 @@ MEDIA_URL = '/media/'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF доверенные источники (ДОБАВЛЕНО для Railway)
+# CSRF доверенные источники
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.railway.internal',
@@ -152,11 +146,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Безопасность (для HTTPS) - ИСПРАВЛЕНО для Railway
+# Безопасность
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True  # Оставляем True для HTTPS
-SESSION_COOKIE_SECURE = True  # Оставляем True для HTTPS
-SECURE_SSL_REDIRECT = False  # ИСПРАВЛЕНО: Railway уже использует HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ДОБАВЛЕНО для Railway
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
