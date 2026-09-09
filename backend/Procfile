@@ -1,1 +1,1 @@
-web: gunicorn forest_roads.wsgi:application --log-file -
+web: cd backend && python manage.py migrate --settings=forest_roads.settings_prod && gunicorn forest_roads.wsgi:application --bind 0.0.0.0:$PORT

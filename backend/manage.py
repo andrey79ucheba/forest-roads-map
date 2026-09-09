@@ -6,7 +6,13 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forest_roads.settings')
+    # Проверяем, запущены ли мы в продакшене (Railway)
+    if os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('RAILWAY_SERVICE_ID'):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forest_roads.settings_prod')
+    else:
+        # Для локальной разработки
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forest_roads.settings')
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

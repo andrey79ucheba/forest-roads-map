@@ -47,7 +47,7 @@ ROOT_URLCONF = 'forest_roads.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # ДОБАВЛЕНО: путь к шаблонам
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,13 +63,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'forest_roads.wsgi.application'
 
 # ===== НАСТРОЙКА БАЗЫ ДАННЫХ (С ПОДДЕРЖКОЙ DATABASE_URL) =====
-# Сначала пробуем использовать DATABASE_URL (передаётся Railway)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # Если DATABASE_URL есть — используем её с SSL
+    # Для Neon используем pooled connection с SSL
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, ssl_require=True)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            ssl_require=True,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
     # Запасной вариант для локальной разработки
@@ -116,6 +120,12 @@ MEDIA_URL = '/media/'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF доверенные источники (ДОБАВЛЕНО для Railway)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://*.railway.internal',
+]
+
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -142,10 +152,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Безопасность (для HTTPS)
+# Безопасность (для HTTPS) - ИСПРАВЛЕНО для Railway
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True  # Оставляем True для HTTPS
+SESSION_COOKIE_SECURE = True  # Оставляем True для HTTPS
+SECURE_SSL_REDIRECT = False  # ИСПРАВЛЕНО: Railway уже использует HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ДОБАВЛЕНО для Railway
